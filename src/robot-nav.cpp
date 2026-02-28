@@ -4,16 +4,40 @@
 
 #include "robot.h"
 
+
+void Robot::PrintState(void) {
+    Serial.print(robotState);
+    Serial.print("Current x: ");
+    Serial.print(currPose.x);
+    Serial.print(" Current y: ");
+    Serial.print(currPose.y);
+    Serial.print(" Current theta: ");
+    Serial.println(currPose.theta);
+    Serial.print("Destination x: ");
+    Serial.print(destPose.x);
+    Serial.print(" Destination y: ");
+    Serial.print(destPose.y);
+    Serial.print(" Destination theta: ");
+    Serial.println(destPose.theta);
+}
+
 void Robot::UpdatePose(const Twist& twist)
 {
-    /**
-     * TODO: Add your FK algorithm to update currPose here.
-     */
-
+    /*
+    Update pose from given twist
+    */
+    float oldTheta = currPose.theta;
+    currPose.theta += chassis.CONTROL_LOOP_PERIOD_MS * twist.omega;
+    float theta_star = (float) (oldTheta + currPose.theta) / 2;
+    currPose.x += chassis.CONTROL_LOOP_PERIOD_MS * twist.u * cos(theta_star);
+    currPose.y += chassis.CONTROL_LOOP_PERIOD_MS * twist.u * sin(theta_star);
+    if (currPose.theta > PI) {
+        currPose.theta -= 2*PI;
+    } else if (currPose.theta < PI * -1) {
+        currPose.theta += 2*PI;
+    }
 #ifdef __NAV_DEBUG__
-    TeleplotPrint("x", currPose.x);
-    TeleplotPrint("y", currPose.y);
-    TeleplotPrint("theta", currPose.theta);
+
 #endif
 
 }
@@ -23,50 +47,51 @@ void Robot::UpdatePose(const Twist& twist)
  */
 void Robot::SetDestination(const Pose& dest)
 {
-    /**
-     * TODO: Turn on LED, as well.
-     */
+    digitalWrite(13, HIGH);
     Serial.print("Setting dest to: ");
     Serial.print(dest.x);
     Serial.print(", ");
     Serial.print(dest.y);
     Serial.print('\n');
-
     destPose = dest;
     robotState = ROBOT_DRIVE_TO_POINT;
 }
 
 bool Robot::CheckReachedDestination(void)
 {
-    bool retVal = false;
-    /**
-     * TODO: Add code to check if you've reached destination here.
-     */
-
-    return retVal;
+    return ((destPose.x - 5 <= currPose.x && currPose.x <= destPose.x + 5) && 
+        (destPose.y - 5 <= currPose.y && currPose.y <= destPose.y + 5));
 }
 
 void Robot::DriveToPoint(void)
 {
     if(robotState == ROBOT_DRIVE_TO_POINT)
     {
-        /**
-         * TODO: Add your IK algorithm here. 
-         */
+        float distanceError = sqrt(sq(destPose.x - currPose.x) + sq(destPose.y - currPose.y));
+        if (distanceError > 45) {
+            distanceError = 45;
+        }
+        float thetaError = atan2(destPose.y - currPose.y, destPose.x - currPose.x) - currPose.theta;
+        if (thetaError > PI ){
+            thetaError -= 2*PI;
+        } else if (thetaError < -1*PI) {
+            thetaError += 2*PI;
+        }
+        float leftEffort = Kp_dist * distanceError - Kp_theta * thetaError;
+        float rightEffort = Kp_dist * distanceError + Kp_theta * thetaError;
 
 #ifdef __NAV_DEBUG__
-        // Print useful stuff here.
+        
 #endif
-
-        /**
-         * TODO: Call chassis.SetMotorEfforts() to command the motion, based on your calculations above.
-         */
+        chassis.SetMotorEfforts(leftEffort, rightEffort);
     }
 }
 
 void Robot::HandleDestination(void)
 {
-    /**
-     * TODO: Stop and change state. Turn off LED.
-     */
+    EnterIdleState();
+    currentPoint++;
+    if (currentPoint < 2) {
+        SetDestination(path[currentPoint]);
+    }
 }

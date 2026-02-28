@@ -90,6 +90,9 @@ void Chassis::InititalizeChassis(void)
 {
     InitializeMotorControlTimer();
     InitializeMotors();
+    pinMode(1, OUTPUT);
+    pinMode(2, OUTPUT);
+    pinMode(3, OUTPUT);
 }
 
 /**
@@ -141,11 +144,16 @@ Twist Chassis::CalcOdomFromWheelMotion(void)
 {
     Twist velocity;
     /**
-     * TODO: Calculate velocities from wheel motion, which are held in leftMotor.spped and rightMotor.speed.
+     * Calculate velocities from wheel motion, which are held in leftMotor.spped and rightMotor.speed.
      * Note that you might want to calculate the deltas instead of speeds (to save some floating point maths). 
      * 
      * In that case, you should return a Pose instead of a Twist.
      */
+    float rightMotorSpeedCM = rightMotor.speed / RIGHT_TICKS_PER_CM;
+    float leftMotorSpeedCM = leftMotor.speed / LEFT_TICKS_PER_CM;
+    velocity.u = (float) ((rightMotorSpeedCM + leftMotorSpeedCM) / 2 ) / CONTROL_LOOP_PERIOD_MS;
+    velocity.omega = (float) ((rightMotorSpeedCM - leftMotorSpeedCM)/ (ROBOT_RADIUS * 2)) / CONTROL_LOOP_PERIOD_MS;
+    return velocity;
 
 #ifdef __NAV_DEBUG__
     TeleplotPrint("u", velocity.u);

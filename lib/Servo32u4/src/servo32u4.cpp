@@ -1,4 +1,4 @@
-#include <servo32u4.h>
+#include "./servo32u4.h"
 
 uint16_t Servo32U4Base::setMinMaxMicroseconds(uint16_t min, uint16_t max)
 {
@@ -10,6 +10,8 @@ uint16_t Servo32U4Base::setMinMaxMicroseconds(uint16_t min, uint16_t max)
 
     return usMax - usMin; //return the range, in case the user wants to do a sanity check
 }
+
+
 
 void Servo32U4Pin5::attach(void) 
 {
@@ -141,7 +143,7 @@ void Servo32U4Pin13::writeMicroseconds(uint16_t microseconds)
 void Servo32U4Pin12::attach(void) 
 {
     pinMode(12, OUTPUT); // set pin as OUTPUT
-
+    Serial.println("ATTACHING PIN 12");
     cli();
 
     // Be careful here, since Timer4 is used to manage speed controller. See Chassis::init()
@@ -175,7 +177,7 @@ void Servo32U4Pin12::writeMicroseconds(uint16_t microseconds)
     {
         attach();
     }
-
+    
     microseconds = constrain(microseconds, usMin, usMax);
 
     //prescaler is 512, so 1 timer count = 32 us

@@ -4,16 +4,11 @@
 
 #include "chassis-params.h"
 #include "utils.h"
+#include <Romi32U4.h>
 
 class Chassis
 {
 protected:
-
-    /**
-     * You can change the control loop period, but you should use multiples of 4 ms to 
-     * avoid rounding errors.
-     */
-    const uint16_t CONTROL_LOOP_PERIOD_MS = 20;
 
     /**
      * loopFlag is used to tell the program when to update. It is set when Timer4
@@ -28,6 +23,7 @@ protected:
 public:
     Chassis(void) {}
     void InititalizeChassis(void);
+    const uint16_t CONTROL_LOOP_PERIOD_MS = 20;
 
     /* Where the bulk of the work for the motors gets done. */
     bool ChassisLoop(Twist&);
@@ -40,8 +36,8 @@ public:
 
 
     void SetMotorEfforts(int16_t, int16_t);
-
     void Stop(void) { SetMotorEfforts(0, 0);} 
+
 
 protected:
     /**

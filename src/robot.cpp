@@ -1,19 +1,23 @@
 #include "robot.h"
 
+Romi32U4ButtonA buttonA;
+Romi32U4ButtonB buttonB;
+Romi32U4ButtonC buttonC;
+Claw claw;
+FourBar fourbar;
+// Slide slide;
+
 void Robot::InitializeRobot(void)
 {
     chassis.InititalizeChassis();
-
-    /**
-     * TODO: Set pin 13 HIGH when navigating and LOW when destination is reached.
-     * Need to set as OUTPUT here.
-     */
+    claw.init();
+    // fourbar.init();
+    // slide.init();
 }
 
 void Robot::EnterIdleState(void)
 {
     chassis.Stop();
-
     Serial.println("-> IDLE");
     robotState = ROBOT_IDLE;
 }
@@ -27,24 +31,70 @@ void Robot::RobotLoop(void)
      /**
      * Run the chassis loop, which handles low-level control.
      */
+    
     Twist velocity;
     if(chassis.ChassisLoop(velocity))
     {
-        // We do FK regardless of state
-        UpdatePose(velocity);
-        chassis.SetMotorEfforts(220,-220);
-        
-        /**
-         * Here, we break with tradition and only call these functions if we're in the 
-         * DRIVE_TO_POINT state. CheckReachedDestination() is expensive, so we don't want
-         * to do all the maths when we don't need to.
-         * 
-         * While we're at it, we'll toss DriveToPoint() in, as well.
-         */ 
-        if(robotState == ROBOT_DRIVE_TO_POINT)
-        {
-            DriveToPoint();
-            if(CheckReachedDestination()) HandleDestination();
+        claw.open();
+        // fourbar.changePos(0);
+        // slide.moveDist(2000);
+        if (fourbar.servo.isAttached) {
+            Serial.println("ATTACHED IT");
         }
+
+        // if (robotState == FOURBAR_MOVE) {
+        //     fourbar.changePos(fourbar.positionIndex + 1);
+        //     if (fourbar.posiitionReached) {
+        //         robotState = SLIDE_MOVE;
+        //         fourbar.positionIndex++;
+        //     }
+        // } else if (robotState == SLIDE_MOVE) {
+        //     slide.moveDist(slide.currentIndex);
+        //     if (slide.positionReached) {
+        //         switch (slide.currentIndex) {
+        //         case 0:
+        //             robotState = CLAW_OPEN;
+        //             break;
+        //         case 1:
+        //             robotState = FOURBAR_MOVE;
+        //             break;
+        //         case 2:
+        //             robotState = CLAW_CLOSE;
+        //         case 3:
+        //             robotState = FOURBAR_MOVE;
+        //         case 4:
+        //             robotState = CLAW_OPEN;
+        //         case 5:
+        //             robotState = ROBOT_DRIVE_TO_POINT;
+        //         default:
+        //             break;
+        //         }
+        //         slide.currentIndex++;
+        //     }
+        // } else if (robotState == CLAW_OPEN) {
+        //     claw.open();
+        //     if (claw.opened) {
+        //         robotState = SLIDE_MOVE;
+        //     }
+        // } else if (robotState == CLAW_CLOSE) {
+        //     claw.close();
+        //     if (!claw.opened) {
+        //         if (fourbar.positionIndex == 0) {
+        //             robotState = FOURBAR_MOVE;
+        //         } else if (fourbar.positionIndex == 2) {
+        //             robotState = SLIDE_MOVE;
+        //         }
+        //     }
+        // }
+
+        // // We do FK regardless of state
+        // else if (robotState == ROBOT_DRIVE_TO_POINT) {
+        //     PrintState();
+        //     if (CheckReachedDestination()) {
+        //         HandleDestination();
+        //     } else {
+        //         DriveToPoint();
+        //     }
+        // }
     }
 }

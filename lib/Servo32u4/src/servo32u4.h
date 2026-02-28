@@ -44,31 +44,39 @@ protected:
     uint16_t usMax = 2000;
 
     uint8_t feedbackPin = -1;
-    bool isAttached = false;
+    
 
     uint16_t targetPos = 1500;
     uint16_t currentPos = 1500;
 
 public:
     // Virtual functions defined for each specific class
-    virtual void attach(void) = 0;
-    virtual void detach(void) = 0;
-    void setTargetPos(uint16_t target) {targetPos = target;}
+    bool isAttached = false;
+    void setTargetPos(uint16_t target) {targetPos = target;};
 
     /**
-     * update() moves the servo towards the target position. You will want to 
+     * update() moves the servo towards the target position. You will want to
      * change it to return a bool to detect the event of reaching the target.
      */
-    void update(void) 
-    {
-        if(targetPos == currentPos) {} // no need to update
+    bool update(void) {
+        bool atTarget = false;
+        if (targetPos == currentPos) {
+            atTarget = true;
+        }
 
         else if(abs(targetPos - currentPos) <= 40) currentPos = targetPos;
         else if(targetPos > currentPos) currentPos += 40;
         else if(targetPos < currentPos) currentPos -= 40;
-
         writeMicroseconds(currentPos);
-    }
+        return atTarget;
+    };
+    /**
+     * Shows the current position of the servo, useful for debugging
+     */
+    void showPos(void) {
+        Serial.print("Servo Position: ");
+        Serial.println(currentPos);
+    };
 
     uint16_t setMinMaxMicroseconds(uint16_t min, uint16_t max);
 

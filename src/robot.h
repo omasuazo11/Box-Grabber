@@ -1,6 +1,9 @@
 #pragma once
 
 #include "chassis.h"
+#include "claw.h"
+#include "slide.h"
+#include "fourbar.h"
 
 class Robot
 {
@@ -11,10 +14,14 @@ protected:
      */
     enum ROBOT_STATE 
     {
-        ROBOT_IDLE,
         ROBOT_DRIVE_TO_POINT,
+        ROBOT_IDLE,
+        CLAW_OPEN,
+        CLAW_CLOSE,
+        FOURBAR_MOVE,
+        SLIDE_MOVE
     };
-    ROBOT_STATE robotState = ROBOT_IDLE;
+    ROBOT_STATE robotState = CLAW_CLOSE;
 
     /* Define the chassis*/
     Chassis chassis;
@@ -32,8 +39,13 @@ public:
     Robot(void) {keyString.reserve(10);}
     void InitializeRobot(void);
     void RobotLoop(void);
+    void PrintState(void);
+    const float Kp_dist = 2.75;
+    const float Kp_theta = 70;
 
 protected:
+    Pose path[2] = {Pose(-20, 30, 0), Pose(-25, 20, 0)};
+    int currentPoint = 0;
     /* State changes */    
     void EnterIdleState(void);
 
