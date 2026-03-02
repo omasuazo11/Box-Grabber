@@ -31,11 +31,11 @@ void Robot::UpdatePose(const Twist& twist)
     float theta_star = (float) (oldTheta + currPose.theta) / 2;
     currPose.x += chassis.CONTROL_LOOP_PERIOD_MS * twist.u * cos(theta_star);
     currPose.y += chassis.CONTROL_LOOP_PERIOD_MS * twist.u * sin(theta_star);
-    if (currPose.theta > PI) {
-        currPose.theta -= 2*PI;
-    } else if (currPose.theta < PI * -1) {
-        currPose.theta += 2*PI;
-    }
+    // if (currPose.theta > PI) {
+    //     currPose.theta -= 2*PI;
+    // } else if (currPose.theta < PI * -1) {
+    //     currPose.theta += 2*PI;
+    // }
 #ifdef __NAV_DEBUG__
 
 #endif
@@ -90,8 +90,18 @@ void Robot::DriveToPoint(void)
 void Robot::HandleDestination(void)
 {
     EnterIdleState();
-    currentPoint++;
-    if (currentPoint < 2) {
-        SetDestination(path[currentPoint]);
+}
+
+void Robot::TurnInPlace(int degrees) {
+    float rads = degrees * PI / 180;
+    float thetaError = rads - currPose.theta; 
+    if (thetaError > PI / 2) {
+        thetaError = PI / 2;
+    }
+    float leftEffort = - Kp_theta * thetaError;
+    float rightEffort = Kp_theta * thetaError;
+    chassis.SetMotorEfforts(leftEffort, rightEffort);
+    if (abs(thetaError) < 0.35 ) {
+        turnFinished = true;
     }
 }

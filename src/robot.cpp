@@ -5,14 +5,14 @@ Romi32U4ButtonB buttonB;
 Romi32U4ButtonC buttonC;
 Claw claw;
 FourBar fourbar;
-// Slide slide;
+Slide slide;
 
 void Robot::InitializeRobot(void)
 {
     chassis.InititalizeChassis();
     claw.init();
-    // fourbar.init();
     // slide.init();
+    // fourbar.init();
 }
 
 void Robot::EnterIdleState(void)
@@ -33,68 +33,85 @@ void Robot::RobotLoop(void)
      */
     
     Twist velocity;
-    if(chassis.ChassisLoop(velocity))
-    {
-        claw.open();
-        // fourbar.changePos(0);
-        // slide.moveDist(2000);
-        if (fourbar.servo.isAttached) {
-            Serial.println("ATTACHED IT");
+    if(chassis.ChassisLoop(velocity)) {
+        if (buttonC.isPressed()) {
+            robotState = ROBOT_TURN_IN_PLACE;
+        } else if (robotState == FOURBAR_MOVE) {
+            // fourbar.changePos(fourbar.positionIndex + 1);
+            fourbar.changePos(3);
+            if (fourbar.posiitionReached) {
+                robotState = SLIDE_MOVE;
+                fourbar.posiitionReached = false;
+                fourbar.positionIndex++;
+            }
+        } else if (robotState == SLIDE_MOVE) {
+            // slide.moveDist(slide.currentIndex);
+            if (slide.positionReached) {
+                slide.positionReached = false;
+                slide.currentIndex++;
+                switch (slide.currentIndex) {
+                case 0:
+                    robotState = CLAW_OPEN;
+                    break;
+                case 1:
+                    robotState = FOURBAR_MOVE;
+                    break;
+                case 2:
+                    robotState = CLAW_CLOSE;
+                    break;
+                case 3:
+                    robotState = FOURBAR_MOVE;
+                    break;
+                case 4:
+                    robotState = CLAW_OPEN;
+                    break;
+                case 5:
+                    robotState = ROBOT_TURN_IN_PLACE;
+                    claw.detach();
+                    fourbar.detach();
+                    break;
+                default:
+                    break;
+                }
+            }
+        } else if (robotState == CLAW_OPEN) {
+            claw.open();
+            if (claw.opened) {
+                robotState = SLIDE_MOVE;
+            }
+        } else if (robotState == CLAW_CLOSE) {
+            claw.close();
+            if (!claw.opened) {
+                if (fourbar.positionIndex == 0) {
+                    robotState = FOURBAR_MOVE;
+                    fourbar.init();
+                } else if (fourbar.positionIndex == 2) {
+                    robotState = SLIDE_MOVE;
+                }
+            }
         }
 
-        // if (robotState == FOURBAR_MOVE) {
-        //     fourbar.changePos(fourbar.positionIndex + 1);
-        //     if (fourbar.posiitionReached) {
-        //         robotState = SLIDE_MOVE;
-        //         fourbar.positionIndex++;
-        //     }
-        // } else if (robotState == SLIDE_MOVE) {
-        //     slide.moveDist(slide.currentIndex);
-        //     if (slide.positionReached) {
-        //         switch (slide.currentIndex) {
-        //         case 0:
-        //             robotState = CLAW_OPEN;
-        //             break;
-        //         case 1:
-        //             robotState = FOURBAR_MOVE;
-        //             break;
-        //         case 2:
-        //             robotState = CLAW_CLOSE;
-        //         case 3:
-        //             robotState = FOURBAR_MOVE;
-        //         case 4:
-        //             robotState = CLAW_OPEN;
-        //         case 5:
-        //             robotState = ROBOT_DRIVE_TO_POINT;
-        //         default:
-        //             break;
-        //         }
-        //         slide.currentIndex++;
-        //     }
-        // } else if (robotState == CLAW_OPEN) {
-        //     claw.open();
-        //     if (claw.opened) {
-        //         robotState = SLIDE_MOVE;
-        //     }
-        // } else if (robotState == CLAW_CLOSE) {
-        //     claw.close();
-        //     if (!claw.opened) {
-        //         if (fourbar.positionIndex == 0) {
-        //             robotState = FOURBAR_MOVE;
-        //         } else if (fourbar.positionIndex == 2) {
-        //             robotState = SLIDE_MOVE;
-        //         }
-        //     }
-        // }
-
-        // // We do FK regardless of state
-        // else if (robotState == ROBOT_DRIVE_TO_POINT) {
-        //     PrintState();
-        //     if (CheckReachedDestination()) {
-        //         HandleDestination();
-        //     } else {
-        //         DriveToPoint();
-        //     }
-        // }
+        else if (robotState == ROBOT_TURN_IN_PLACE) {
+            UpdatePose(velocity);
+            // 250
+            TurnInPlace(180);
+            if (turnFinished) {
+                chassis.Stop();
+                // Reset Current Pose for simplicity 
+                currPose = Pose(0, 0, 0);
+                robotState = ROBOT_DRIVE_TO_POINT;
+            }
+        }
+        // We do FK regardless of state
+        else if (robotState == ROBOT_DRIVE_TO_POINT) {
+            UpdatePose(velocity);
+            if (CheckReachedDestination()) {
+                HandleDestination();
+            } else {
+                DriveToPoint();
+            }
+        } else if (robotState == ROBOT_IDLE) {
+            chassis.Stop();
+        }
     }
 }

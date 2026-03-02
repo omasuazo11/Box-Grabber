@@ -152,11 +152,28 @@ protected:
  * 
  * Note that because we're using an 8-bit timer, resolution is only 64 us.
  */
-class Servo32U4Pin13 : public Servo32U4Base
+class ServoPin1 
 {
 public:
     void attach(void);
     void detach(void);
+    void setPosition(void);
+    uint16_t targetPos = 1500;
+    uint16_t currentPos = 1500;
+    void setTargetPos(uint16_t target) {targetPos = target;};
+
+    bool update(void) {
+        bool atTarget = false;
+        if (targetPos == currentPos) {
+            atTarget = true;
+        }
+
+        else if(abs(targetPos - currentPos) <= 40) currentPos = targetPos;
+        else if(targetPos > currentPos) currentPos += 40;
+        else if(targetPos < currentPos) currentPos -= 40;
+        writeMicroseconds(currentPos);
+        return atTarget;
+    };
 
 protected:
     void writeMicroseconds(uint16_t microseconds);

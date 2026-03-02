@@ -90,7 +90,6 @@ void Chassis::InititalizeChassis(void)
 {
     InitializeMotorControlTimer();
     InitializeMotors();
-    pinMode(1, OUTPUT);
     pinMode(2, OUTPUT);
     pinMode(3, OUTPUT);
 }

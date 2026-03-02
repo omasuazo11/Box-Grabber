@@ -19,9 +19,10 @@ protected:
         CLAW_OPEN,
         CLAW_CLOSE,
         FOURBAR_MOVE,
-        SLIDE_MOVE
+        SLIDE_MOVE,
+        ROBOT_TURN_IN_PLACE
     };
-    ROBOT_STATE robotState = CLAW_CLOSE;
+    ROBOT_STATE robotState = ROBOT_IDLE;
 
     /* Define the chassis*/
     Chassis chassis;
@@ -32,19 +33,20 @@ protected:
     /**
      * For tracking current pose and the destination.
      */
-    Pose currPose;
-    Pose destPose;
+    // Pose destPose = Pose(35, -10, 0);
+    Pose destPose = Pose(42, 33, 0);
     
 public:
+    Pose currPose;
     Robot(void) {keyString.reserve(10);}
     void InitializeRobot(void);
     void RobotLoop(void);
     void PrintState(void);
     const float Kp_dist = 2.75;
-    const float Kp_theta = 70;
+    const float Kp_theta = 90;
+    bool turnFinished = false;
 
 protected:
-    Pose path[2] = {Pose(-20, 30, 0), Pose(-25, 20, 0)};
     int currentPoint = 0;
     /* State changes */    
     void EnterIdleState(void);
@@ -53,6 +55,7 @@ protected:
     void UpdatePose(const Twist& u);
     void SetDestination(const Pose& destination);
     void DriveToPoint(void);
+    void TurnInPlace(int degrees);
     bool CheckReachedDestination(void);
     void HandleDestination(void);
 };

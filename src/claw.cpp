@@ -3,7 +3,7 @@
 void Claw::init(void) {
     servo.attach();
     // Start with open claw because it'll go wild when uploading
-    open();
+    // open();
 }
 
 void Claw::open(void) {
@@ -12,7 +12,6 @@ void Claw::open(void) {
     if (servo.update()) {
         opened = true;
     }
-    activate();
 }
 
 void Claw::close(void) {
@@ -20,15 +19,8 @@ void Claw::close(void) {
     if (servo.update()) {
         opened = false;
     } 
-    activate(); 
 }
 
 void Claw::detach() {
     servo.detach();
-}
-
-void Claw::activate() {
-    digitalWrite(pin, HIGH);
-    digitalWrite(1, LOW);
-    digitalWrite(2, LOW);
 }

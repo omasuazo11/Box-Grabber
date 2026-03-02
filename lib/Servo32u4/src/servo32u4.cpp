@@ -96,49 +96,16 @@ void Servo32U4Pin6::writeMicroseconds(uint16_t microseconds)
     OCR4D = (microseconds >> 5) - 1; // divides by 32
 }
 
-void Servo32U4Pin13::attach(void) 
-{
-    pinMode(13, OUTPUT); // set pin as OUTPUT
-
-    cli();
-
-    // Be careful here, since Timer4 is used to manage speed controller. See Chassis::init()
-    TCCR4A |= 0x82;
-
-    sei();
-
-    isAttached = true;
-}
-
-void Servo32U4Pin13::detach(void) 
-{
-    cli();
-
-    // Be careful here, since Timer4 is used to manage speed controller. See Chassis::init()
-    // If you're not using it for anything else, you can safely just set TCCR4A = 0,
-    // but we'll cancel the bits we set above
-    TCCR4A &= ~0x82;
-
-    sei();
-
-    isAttached = false;
-}
-
 // Resolution is 64 us; not great, but shouldn't be too constraining
-void Servo32U4Pin13::writeMicroseconds(uint16_t microseconds)
-{
-    if (!isAttached)
-    {
-        attach();
-    }
+// void ServoPin1::writeMicroseconds(uint16_t microseconds) {
 
-    microseconds = constrain(microseconds, usMin, usMax);
+//     microseconds = constrain(microseconds, usMin, usMax);
 
-    //prescaler is 512, so 1 timer count = 32 us
-    //but be sure to set TC4H first!
-    TC4H = 0;
-    OCR4A = (microseconds >> 5) - 1; // divides by 32
-}
+//     //prescaler is 512, so 1 timer count = 32 us
+//     //but be sure to set TC4H first!
+//     TC4H = 0;
+//     OCR4A = (microseconds >> 5) - 1; // divides by 32
+// }
 
 void Servo32U4Pin12::attach(void) 
 {
