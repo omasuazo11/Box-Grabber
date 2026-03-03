@@ -12,7 +12,7 @@ void Robot::InitializeRobot(void)
     chassis.InititalizeChassis();
     claw.init();
     // slide.init();
-    // fourbar.init();
+    fourbar.init();
 }
 
 void Robot::EnterIdleState(void)
@@ -35,21 +35,20 @@ void Robot::RobotLoop(void)
     Twist velocity;
     if(chassis.ChassisLoop(velocity)) {
         if (buttonC.isPressed()) {
-            robotState = ROBOT_TURN_IN_PLACE;
+            robotState = CLAW_CLOSE;
         } else if (robotState == FOURBAR_MOVE) {
-            // fourbar.changePos(fourbar.positionIndex + 1);
-            fourbar.changePos(3);
+            fourbar.changePos(fourbar.positionIndex + 1);
             if (fourbar.posiitionReached) {
                 robotState = SLIDE_MOVE;
                 fourbar.posiitionReached = false;
                 fourbar.positionIndex++;
             }
         } else if (robotState == SLIDE_MOVE) {
-            // slide.moveDist(slide.currentIndex);
+            slide.moveDist(slide.currentIndex);
             if (slide.positionReached) {
                 slide.positionReached = false;
                 slide.currentIndex++;
-                switch (slide.currentIndex) {
+                switch (slide.currentIndex - 1) {
                 case 0:
                     robotState = CLAW_OPEN;
                     break;
@@ -68,7 +67,6 @@ void Robot::RobotLoop(void)
                 case 5:
                     robotState = ROBOT_TURN_IN_PLACE;
                     claw.detach();
-                    fourbar.detach();
                     break;
                 default:
                     break;
@@ -83,22 +81,29 @@ void Robot::RobotLoop(void)
             claw.close();
             if (!claw.opened) {
                 if (fourbar.positionIndex == 0) {
-                    robotState = FOURBAR_MOVE;
-                    fourbar.init();
+                    robotState = INITIAL_BACK_UP;
                 } else if (fourbar.positionIndex == 2) {
                     robotState = SLIDE_MOVE;
                 }
+            }
+        } else if (robotState == INITIAL_BACK_UP) {
+            slide.moveDist(6);
+            if (slide.positionReached) {
+                robotState = FOURBAR_MOVE;
+                fourbar.init();
+                slide.currentIndex = 0;
+                slide.positionReached = false;
             }
         }
 
         else if (robotState == ROBOT_TURN_IN_PLACE) {
             UpdatePose(velocity);
-            // 250
-            TurnInPlace(180);
+            TurnInPlace(turnAngle);
             if (turnFinished) {
                 chassis.Stop();
                 // Reset Current Pose for simplicity 
                 currPose = Pose(0, 0, 0);
+                turnFinished = false;
                 robotState = ROBOT_DRIVE_TO_POINT;
             }
         }

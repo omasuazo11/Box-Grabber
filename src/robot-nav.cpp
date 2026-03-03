@@ -89,7 +89,16 @@ void Robot::DriveToPoint(void)
 
 void Robot::HandleDestination(void)
 {
-    EnterIdleState();
+    if (drivingNum == 0) {
+        robotState = ROBOT_TURN_IN_PLACE;
+        drivingNum++;
+        turnAngle = 140;
+        destPose = Pose(40, 25, 0);
+        currPose = Pose(0, 0, 0);
+    } else {
+        EnterIdleState();
+    }
+    
 }
 
 void Robot::TurnInPlace(int degrees) {

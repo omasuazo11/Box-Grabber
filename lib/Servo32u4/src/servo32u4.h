@@ -64,9 +64,9 @@ public:
             atTarget = true;
         }
 
-        else if(abs(targetPos - currentPos) <= 40) currentPos = targetPos;
-        else if(targetPos > currentPos) currentPos += 40;
-        else if(targetPos < currentPos) currentPos -= 40;
+        else if(abs(targetPos - currentPos) <= 10) currentPos = targetPos;
+        else if(targetPos > currentPos) currentPos += 10;
+        else if(targetPos < currentPos) currentPos -= 10;
         writeMicroseconds(currentPos);
         return atTarget;
     };

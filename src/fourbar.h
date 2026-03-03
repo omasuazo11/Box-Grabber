@@ -4,7 +4,7 @@
 
 class FourBar {
     protected:
-        uint16_t positions[4] = {1000, 1400, 1600, 2000};
+        uint16_t positions[4] = {1000, 1420, 1625, 2000};
     public:
         Servo32U4Pin5 servo;
         void changePos(int targetPos);

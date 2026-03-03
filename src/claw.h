@@ -5,7 +5,7 @@
 class Claw {
     protected:
         Servo32U4Pin12 servo;
-        uint16_t open_us = 1100;
+        uint16_t open_us = 1120;
         uint16_t close_us = 1300;
     public:
         

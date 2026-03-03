@@ -17,6 +17,6 @@ private:
     static void isrA();
     const int tolerance = 3;
     const int OnPin = 1;
-    const int AIN2 = 12;
-    const int AIN1 = 13;
+    const int AIN2 = 4;
+    const int AIN1 = 11;
 };

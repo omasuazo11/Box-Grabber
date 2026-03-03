@@ -20,7 +20,8 @@ protected:
         CLAW_CLOSE,
         FOURBAR_MOVE,
         SLIDE_MOVE,
-        ROBOT_TURN_IN_PLACE
+        ROBOT_TURN_IN_PLACE,
+        INITIAL_BACK_UP
     };
     ROBOT_STATE robotState = ROBOT_IDLE;
 
@@ -34,7 +35,7 @@ protected:
      * For tracking current pose and the destination.
      */
     // Pose destPose = Pose(35, -10, 0);
-    Pose destPose = Pose(42, 33, 0);
+    Pose destPose = Pose(25, 0, 0);
     
 public:
     Pose currPose;
@@ -42,9 +43,11 @@ public:
     void InitializeRobot(void);
     void RobotLoop(void);
     void PrintState(void);
-    const float Kp_dist = 2.75;
-    const float Kp_theta = 90;
+    const float Kp_dist = 4.5;
+    const float Kp_theta = 95;
     bool turnFinished = false;
+    int drivingNum = 0;
+    int turnAngle = 60;
 
 protected:
     int currentPoint = 0;

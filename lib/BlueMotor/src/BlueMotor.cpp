@@ -10,8 +10,8 @@ volatile long prevBState = 1;
 volatile long prevTimeA = 0;
 volatile long prevTimeB = 0;
 unsigned time = 0;
-const int ENCA = 0;
-const int ENCB = 1;
+const int ENCA = 2;
+const int ENCB = 3;
 
 BlueMotor::BlueMotor()
 {
@@ -85,7 +85,12 @@ void BlueMotor::isrB() {
 }
 void BlueMotor::move(bool clockwise)
 {
-    encCount = count;
+    // if (encCount % 2 == 0) {
+    //     digitalWrite(OnPin, HIGH);
+    // } else {
+    //     digitalWrite(OnPin, LOW);
+    // }
+    // encCount++;
     digitalWrite(OnPin, HIGH);
     if (clockwise)
     {
@@ -100,5 +105,10 @@ void BlueMotor::move(bool clockwise)
 }
 
 void BlueMotor::stop() {
+    // if (encCount % 2 == 1) {
+    //     encCount++;
+    // }
     digitalWrite(OnPin, LOW);
+    digitalWrite(AIN1, LOW);
+    digitalWrite(AIN2, LOW);
 }
